@@ -52,7 +52,7 @@ namespace CoddingAssesment.Application.Commands
         private AgentState OnLunch(UpdateAgentRequest request)
         {
             var agentTime = request.TimeStampUtc.TimeOfDay;
-            if (agentTime < _startDate && agentTime > _endDate)
+            if (agentTime < _startDate || agentTime > _endDate)
             {
                 throw new NotLunchTimeException(agentTime);
             }

@@ -21,11 +21,15 @@ namespace CodingAssessment.Persistence
                     var client = new MongoClient(settings);
                     return client.GetDatabase(AgentMongoDatabase);
                 })
-                .AddScoped<IAgentRepository, AgentMongoRepository>()
+                .AddScoped<AgentMongoRepository>()
                 .AddDbContext<PostgreContext>(options => options.UseNpgsql(configuration.GetConnectionString(DatabaseType.Postgre.ToString())!))
-                .AddScoped<IAgentRepository, AgentPostgreRepository>()
-                .Decorate<IAgentRepository>((_, provider) =>
-                new AgentRepositoryProxy(provider.GetServices<IAgentRepository>(), provider.GetRequiredService<IOptionsSnapshot<DatabaseSelectorConfiguration>>()));
+                .AddScoped<AgentPostgreRepository>()
+                .AddScoped<IAgentRepository>((provider) =>
+                {
+                    var mongo = provider.GetRequiredService<AgentMongoRepository>();
+                    var postgre = provider.GetRequiredService<AgentPostgreRepository>();
+                    return new AgentRepositoryProxy(new IAgentRepository[] { mongo, postgre }, provider.GetRequiredService<IOptionsSnapshot<DatabaseSelectorConfiguration>>());
+                });
         }
     }
 }
