@@ -1,6 +1,6 @@
-﻿using MediatR;
+﻿using System.Reflection;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
 namespace CoddingAssesment.Application
 {
@@ -10,7 +10,8 @@ namespace CoddingAssesment.Application
 
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            return services.AddMediatR(ThisAssembly);
+            return services.AddMediatR(ThisAssembly)
+                           .AddTransient<IDateTimeProvider, DateTimeProvider>();
         }
     }
 }

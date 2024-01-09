@@ -10,13 +10,13 @@ namespace CoddingAssesment.Application.Commands
         private readonly TimeSpan _endDate = TimeOnly.Parse("01:00 PM").ToTimeSpan();
         private readonly TimeSpan _allowableInterval = TimeSpan.FromHours(1);
 
-        // TODO: get from property; 
-        private readonly DateTime CurrentDate = DateTime.UtcNow;
+        private readonly IDateTimeProvider _dateTimeProvider;
         private IAgentRepository _repository;
 
-        public UpdateAgentHandler(IAgentRepository repository)
+        public UpdateAgentHandler(IAgentRepository repository, IDateTimeProvider dateTimeProvider)
         {
             _repository = repository;
+            _dateTimeProvider = dateTimeProvider;
         }
 
         public async Task<AgentState> Handle(UpdateAgentRequest request, CancellationToken cancellationToken)
@@ -30,7 +30,7 @@ namespace CoddingAssesment.Application.Commands
 
         private AgentState DetermineAgentState(UpdateAgentRequest request)
         {
-            var interval = (request.TimeStampUtc - CurrentDate).Duration();
+            var interval = (request.TimeStampUtc - _dateTimeProvider.UtcNow).Duration();
             if (interval > _allowableInterval)
             {
                 throw new LateEventException(interval);
