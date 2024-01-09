@@ -22,6 +22,7 @@ namespace CodingAssessment.API
         private void HandleException(ExceptionContext context, HttpStatusCode statusCode)
         {
             context.Result = new StatusCodeResult((int)statusCode);
+            context.ExceptionHandled = true;
         }
     }
 }

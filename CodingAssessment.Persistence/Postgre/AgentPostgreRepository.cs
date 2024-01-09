@@ -32,6 +32,8 @@ namespace CodingAssessment.Persistence.Postgre
             record.AgentSkills = agent.QueueIds.Select(skillId => new PostgreAgentSkill() { AgentId = agent.AgentId, SkillId = skillId }).ToList();
 
             _context.Agents.Update(record);
+
+            await _context.SaveChangesAsync(token);
         }
     }
 }
