@@ -24,7 +24,6 @@ namespace CodingAssessment.Persistence
     public enum AgentState
     {
         ON_LUNCH,
-        ON_CALL,
-        BadRequest
+        ON_CALL
     }
 }

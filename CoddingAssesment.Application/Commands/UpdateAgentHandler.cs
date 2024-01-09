@@ -1,22 +1,20 @@
 ﻿using CodingAssessment.Persistence;
 using MediatR;
+using Microsoft.Extensions.Options;
 
 namespace CoddingAssesment.Application.Commands
 {
     internal class UpdateAgentHandler : IRequestHandler<UpdateAgentRequest, AgentState>
     {
-        // TODO: get from config; 
-        private readonly TimeSpan _startDate = TimeOnly.Parse("11:00 AM").ToTimeSpan();
-        private readonly TimeSpan _endDate = TimeOnly.Parse("01:00 PM").ToTimeSpan();
-        private readonly TimeSpan _allowableInterval = TimeSpan.FromHours(1);
-
+        private readonly IAgentRepository _repository;
         private readonly IDateTimeProvider _dateTimeProvider;
-        private IAgentRepository _repository;
+        private readonly IOptionsSnapshot<TimeConfiguration> _options;
 
-        public UpdateAgentHandler(IAgentRepository repository, IDateTimeProvider dateTimeProvider)
+        public UpdateAgentHandler(IAgentRepository repository, IDateTimeProvider dateTimeProvider, IOptionsSnapshot<TimeConfiguration> optionsSnapshot)
         {
             _repository = repository;
             _dateTimeProvider = dateTimeProvider;
+            _options = optionsSnapshot;
         }
 
         public async Task<AgentState> Handle(UpdateAgentRequest request, CancellationToken cancellationToken)
@@ -31,7 +29,7 @@ namespace CoddingAssesment.Application.Commands
         private AgentState DetermineAgentState(UpdateAgentRequest request)
         {
             var interval = (request.TimeStampUtc - _dateTimeProvider.UtcNow).Duration();
-            if (interval > _allowableInterval)
+            if (interval > _options.Value.AllowableInterval)
             {
                 throw new LateEventException(interval);
             }
@@ -52,7 +50,7 @@ namespace CoddingAssesment.Application.Commands
         private AgentState OnLunch(UpdateAgentRequest request)
         {
             var agentTime = request.TimeStampUtc.TimeOfDay;
-            if (agentTime < _startDate || agentTime > _endDate)
+            if (agentTime < _options.Value.StartDate || agentTime > _options.Value.EndDate)
             {
                 throw new NotLunchTimeException(agentTime);
             }
